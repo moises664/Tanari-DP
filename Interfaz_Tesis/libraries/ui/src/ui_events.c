@@ -86,6 +86,6 @@ void ui_event_controlSlider(lv_event_t * e) {
         // Actualizar la etiqueta del porcentaje en la pantalla de configuración
         char buffer[8];
         snprintf(buffer, sizeof(buffer), "%d%%", slider_value);
-        lv_label_set_text(ui_Label2, buffer); // ¡Aquí el cambio!
+        lv_label_set_text(ui_porcentajeLabel, buffer); // ¡Aquí el cambio!
     }
 }

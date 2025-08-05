@@ -32,9 +32,6 @@ void ui_init(void)
     lv_theme_t * theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED),
                                                false, LV_FONT_DEFAULT);
     lv_disp_set_theme(dispp, theme);
-
-    //ui_init_global_style();
-    
     ui_splashScreen_screen_init();
     ui_homeScreen_screen_init();
     ui_monitoreoScreen_screen_init();

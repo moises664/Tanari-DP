@@ -15,7 +15,18 @@ extern void ui_configScreen_screen_init(void);
 extern void ui_configScreen_screen_destroy(void);
 extern lv_obj_t * ui_configScreen;
 extern lv_obj_t * ui_principalPanel3;
-extern lv_obj_t * ui_principalLabel3;
+extern lv_obj_t * ui_principalLabel4;
+extern lv_obj_t * ui_EstadoBateriaContainer3;
+extern lv_obj_t * ui_batCargandoImage3;
+extern lv_obj_t * ui_bat0Image3;
+extern lv_obj_t * ui_bat25Image3;
+extern lv_obj_t * ui_bat50Image3;
+extern lv_obj_t * ui_bat75Image3;
+extern lv_obj_t * ui_bat100Image3;
+extern lv_obj_t * ui_EstadoAcopleContainer3;
+extern lv_obj_t * ui_acopleDesconectadoImage3;
+extern lv_obj_t * ui_sendDataContainer3;
+extern lv_obj_t * ui_sendDataImage3;
 extern lv_obj_t * ui_configuracionPanel;
 extern lv_obj_t * ui_configuracionesLabel;
 extern lv_obj_t * ui_bleContainer;
@@ -26,12 +37,12 @@ extern lv_obj_t * ui_bleOnOffLabel;
 extern lv_obj_t * ui_brilloPanContainer2;
 extern lv_obj_t * ui_brilloLabel;
 extern lv_obj_t * ui_pocentajeBrilloPanel;
-extern lv_obj_t * ui_Label2;
+extern lv_obj_t * ui_porcentajeLabel;
 extern lv_obj_t * ui_controlBrilloPanel;
 extern lv_obj_t * ui_controlSlider;
-extern void ui_event_Button3(lv_event_t * e);
-extern lv_obj_t * ui_Button3;
-extern lv_obj_t * ui_backLabel2;
+extern void ui_event_backButton3(lv_event_t * e);
+extern lv_obj_t * ui_backButton3;
+extern lv_obj_t * ui_backLabel3;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

@@ -10,21 +10,13 @@
 extern "C" {
 #endif
 
-/* --- Eventos de la Pantalla de Monitoreo (YA EXISTENTES) --- */
 void mostrarSensorCO2Valor(lv_event_t * e);
 void mostrarSensorCH4Valor(lv_event_t * e);
 void mostrarSensorTEMPValor(lv_event_t * e);
 void mostrarSensorHUMValor(lv_event_t * e);
 
-/* --- Eventos de la Pantalla de Configuración (NUEVOS) --- */
 void ui_event_bleSwitch(lv_event_t * e);
 void ui_event_controlSlider(lv_event_t * e);
-void ui_event_Button3(lv_event_t * e); // Evento para el botón "Regresar" de la pantalla de config
-
-// *******************************************************************
-// ¡IMPORTANTE! Añade la declaración de esta función aquí
-void updateBLEStatusLabel(void); // Declaración de la función para actualizar el estado del BLE en la UI
-// *******************************************************************
 
 #ifdef __cplusplus
 } /*extern "C"*/

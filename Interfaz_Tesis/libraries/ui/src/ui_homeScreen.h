@@ -14,8 +14,19 @@ extern "C" {
 extern void ui_homeScreen_screen_init(void);
 extern void ui_homeScreen_screen_destroy(void);
 extern lv_obj_t * ui_homeScreen;
-extern lv_obj_t * ui_principalPanel2;
+extern lv_obj_t * ui_principalPanel;
 extern lv_obj_t * ui_principalLabel2;
+extern lv_obj_t * ui_EstadoBateriaContainer;
+extern lv_obj_t * ui_batCargandoImage;
+extern lv_obj_t * ui_bat0Image;
+extern lv_obj_t * ui_bat25Image;
+extern lv_obj_t * ui_bat50Image;
+extern lv_obj_t * ui_bat75Image;
+extern lv_obj_t * ui_bat100Image;
+extern lv_obj_t * ui_EstadoAcopleContainer;
+extern lv_obj_t * ui_acopleDesconectadoImage;
+extern lv_obj_t * ui_sendDataContainer;
+extern lv_obj_t * ui_sendDataImage;
 extern lv_obj_t * ui_menuPanel;
 extern lv_obj_t * ui_configuracionesLabel2;
 extern void ui_event_homeButton(lv_event_t * e);
@@ -24,9 +35,9 @@ extern lv_obj_t * ui_monitorLabel;
 extern void ui_event_confiButton(lv_event_t * e);
 extern lv_obj_t * ui_confiButton;
 extern lv_obj_t * ui_confiLabel;
-extern void ui_event_Button4(lv_event_t * e);
-extern lv_obj_t * ui_Button4;
-extern lv_obj_t * ui_backLabel3;
+extern void ui_event_backButton(lv_event_t * e);
+extern lv_obj_t * ui_backButton;
+extern lv_obj_t * ui_backLabel;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

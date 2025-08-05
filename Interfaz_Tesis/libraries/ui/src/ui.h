@@ -42,7 +42,15 @@ extern "C" {
 extern lv_obj_t * ui____initial_actions0;
 
 // IMAGES AND IMAGE SETS
-LV_IMG_DECLARE(ui_img_welcomebg_320x480_original_png);    // assets/welcomeBg_320x480_original.png
+LV_IMG_DECLARE(ui_img_1571022687);    // assets/login_bg-min_11zon (1).png
+LV_IMG_DECLARE(ui_img_bateria_cargando_png);    // assets/bateria_cargando.png
+LV_IMG_DECLARE(ui_img_bateria_0_png);    // assets/bateria_0.png
+LV_IMG_DECLARE(ui_img_bateria_25_png);    // assets/bateria_25.png
+LV_IMG_DECLARE(ui_img_bateria_50_png);    // assets/bateria_50.png
+LV_IMG_DECLARE(ui_img_bateria_75_png);    // assets/bateria_75.png
+LV_IMG_DECLARE(ui_img_bateria_100_png);    // assets/bateria_100.png
+LV_IMG_DECLARE(ui_img_acople_desconectado_png);    // assets/acople_desconectado.png
+LV_IMG_DECLARE(ui_img_send_data_png);    // assets/send_data.png
 
 // UI INIT
 void ui_init(void);

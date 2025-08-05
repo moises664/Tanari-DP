@@ -30,12 +30,13 @@ void ui_splashScreen_screen_init(void)
     lv_obj_remove_flag(ui_splashScreen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
     ui_bienvenidoImagen = lv_image_create(ui_splashScreen);
-    lv_image_set_src(ui_bienvenidoImagen, &ui_img_welcomebg_320x480_original_png);
-    lv_obj_set_width(ui_bienvenidoImagen, LV_SIZE_CONTENT);   /// 320
-    lv_obj_set_height(ui_bienvenidoImagen, LV_SIZE_CONTENT);    /// 480
+    lv_image_set_src(ui_bienvenidoImagen, &ui_img_1571022687);
+    lv_obj_set_width(ui_bienvenidoImagen, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_bienvenidoImagen, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_bienvenidoImagen, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_bienvenidoImagen, LV_OBJ_FLAG_CLICKABLE);     /// Flags
     lv_obj_remove_flag(ui_bienvenidoImagen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(ui_bienvenidoImagen, 330);
 
     ui_bienvenidosLabel = lv_label_create(ui_splashScreen);
     lv_obj_set_width(ui_bienvenidosLabel, LV_SIZE_CONTENT);   /// 1

@@ -7,7 +7,18 @@
 
 lv_obj_t * ui_configScreen = NULL;
 lv_obj_t * ui_principalPanel3 = NULL;
-lv_obj_t * ui_principalLabel3 = NULL;
+lv_obj_t * ui_principalLabel4 = NULL;
+lv_obj_t * ui_EstadoBateriaContainer3 = NULL;
+lv_obj_t * ui_batCargandoImage3 = NULL;
+lv_obj_t * ui_bat0Image3 = NULL;
+lv_obj_t * ui_bat25Image3 = NULL;
+lv_obj_t * ui_bat50Image3 = NULL;
+lv_obj_t * ui_bat75Image3 = NULL;
+lv_obj_t * ui_bat100Image3 = NULL;
+lv_obj_t * ui_EstadoAcopleContainer3 = NULL;
+lv_obj_t * ui_acopleDesconectadoImage3 = NULL;
+lv_obj_t * ui_sendDataContainer3 = NULL;
+lv_obj_t * ui_sendDataImage3 = NULL;
 lv_obj_t * ui_configuracionPanel = NULL;
 lv_obj_t * ui_configuracionesLabel = NULL;
 lv_obj_t * ui_bleContainer = NULL;
@@ -18,13 +29,13 @@ lv_obj_t * ui_bleOnOffLabel = NULL;
 lv_obj_t * ui_brilloPanContainer2 = NULL;
 lv_obj_t * ui_brilloLabel = NULL;
 lv_obj_t * ui_pocentajeBrilloPanel = NULL;
-lv_obj_t * ui_Label2 = NULL;
+lv_obj_t * ui_porcentajeLabel = NULL;
 lv_obj_t * ui_controlBrilloPanel = NULL;
 lv_obj_t * ui_controlSlider = NULL;
-lv_obj_t * ui_Button3 = NULL;
-lv_obj_t * ui_backLabel2 = NULL;
+lv_obj_t * ui_backButton3 = NULL;
+lv_obj_t * ui_backLabel3 = NULL;
 // event funtions
-void ui_event_Button3(lv_event_t * e)
+void ui_event_backButton3(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -50,15 +61,116 @@ void ui_configScreen_screen_init(void)
     lv_obj_set_style_bg_color(ui_principalPanel3, lv_color_hex(0x6660DD), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_principalPanel3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_principalLabel3 = lv_label_create(ui_principalPanel3);
-    lv_obj_set_width(ui_principalLabel3, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_principalLabel3, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_principalLabel3, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_principalLabel3, "Tanari DP");
-    lv_obj_set_style_text_color(ui_principalLabel3, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_principalLabel3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_principalLabel3, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_principalLabel3, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_principalLabel4 = lv_label_create(ui_principalPanel3);
+    lv_obj_set_width(ui_principalLabel4, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_principalLabel4, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_principalLabel4, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_principalLabel4, "Tanari DP");
+    lv_obj_set_style_text_color(ui_principalLabel4, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_principalLabel4, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_principalLabel4, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_principalLabel4, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_EstadoBateriaContainer3 = lv_obj_create(ui_principalPanel3);
+    lv_obj_remove_style_all(ui_EstadoBateriaContainer3);
+    lv_obj_set_width(ui_EstadoBateriaContainer3, 80);
+    lv_obj_set_height(ui_EstadoBateriaContainer3, 50);
+    lv_obj_set_x(ui_EstadoBateriaContainer3, 127);
+    lv_obj_set_y(ui_EstadoBateriaContainer3, 1);
+    lv_obj_set_align(ui_EstadoBateriaContainer3, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_EstadoBateriaContainer3, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_batCargandoImage3 = lv_image_create(ui_EstadoBateriaContainer3);
+    lv_image_set_src(ui_batCargandoImage3, &ui_img_bateria_cargando_png);
+    lv_obj_set_width(ui_batCargandoImage3, 45);
+    lv_obj_set_height(ui_batCargandoImage3, 35);
+    lv_obj_set_align(ui_batCargandoImage3, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_batCargandoImage3, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_remove_flag(ui_batCargandoImage3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(ui_batCargandoImage3, 17);
+
+    ui_bat0Image3 = lv_image_create(ui_EstadoBateriaContainer3);
+    lv_image_set_src(ui_bat0Image3, &ui_img_bateria_0_png);
+    lv_obj_set_width(ui_bat0Image3, 45);
+    lv_obj_set_height(ui_bat0Image3, 35);
+    lv_obj_set_align(ui_bat0Image3, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_bat0Image3, LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_remove_flag(ui_bat0Image3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(ui_bat0Image3, 17);
+
+    ui_bat25Image3 = lv_image_create(ui_EstadoBateriaContainer3);
+    lv_image_set_src(ui_bat25Image3, &ui_img_bateria_25_png);
+    lv_obj_set_width(ui_bat25Image3, 45);
+    lv_obj_set_height(ui_bat25Image3, 35);
+    lv_obj_set_align(ui_bat25Image3, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_bat25Image3, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_remove_flag(ui_bat25Image3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(ui_bat25Image3, 17);
+
+    ui_bat50Image3 = lv_image_create(ui_EstadoBateriaContainer3);
+    lv_image_set_src(ui_bat50Image3, &ui_img_bateria_50_png);
+    lv_obj_set_width(ui_bat50Image3, 45);
+    lv_obj_set_height(ui_bat50Image3, 35);
+    lv_obj_set_align(ui_bat50Image3, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_bat50Image3, LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_remove_flag(ui_bat50Image3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(ui_bat50Image3, 17);
+
+    ui_bat75Image3 = lv_image_create(ui_EstadoBateriaContainer3);
+    lv_image_set_src(ui_bat75Image3, &ui_img_bateria_75_png);
+    lv_obj_set_width(ui_bat75Image3, 45);
+    lv_obj_set_height(ui_bat75Image3, 35);
+    lv_obj_set_align(ui_bat75Image3, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_bat75Image3, LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_remove_flag(ui_bat75Image3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(ui_bat75Image3, 17);
+
+    ui_bat100Image3 = lv_image_create(ui_EstadoBateriaContainer3);
+    lv_image_set_src(ui_bat100Image3, &ui_img_bateria_100_png);
+    lv_obj_set_width(ui_bat100Image3, 45);
+    lv_obj_set_height(ui_bat100Image3, 35);
+    lv_obj_set_align(ui_bat100Image3, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_bat100Image3, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_remove_flag(ui_bat100Image3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(ui_bat100Image3, 17);
+
+    ui_EstadoAcopleContainer3 = lv_obj_create(ui_principalPanel3);
+    lv_obj_remove_style_all(ui_EstadoAcopleContainer3);
+    lv_obj_set_width(ui_EstadoAcopleContainer3, 66);
+    lv_obj_set_height(ui_EstadoAcopleContainer3, 35);
+    lv_obj_set_x(ui_EstadoAcopleContainer3, -119);
+    lv_obj_set_y(ui_EstadoAcopleContainer3, 1);
+    lv_obj_set_align(ui_EstadoAcopleContainer3, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_EstadoAcopleContainer3, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_acopleDesconectadoImage3 = lv_image_create(ui_EstadoAcopleContainer3);
+    lv_image_set_src(ui_acopleDesconectadoImage3, &ui_img_acople_desconectado_png);
+    lv_obj_set_width(ui_acopleDesconectadoImage3, 45);
+    lv_obj_set_height(ui_acopleDesconectadoImage3, 35);
+    lv_obj_set_x(ui_acopleDesconectadoImage3, -8);
+    lv_obj_set_y(ui_acopleDesconectadoImage3, 0);
+    lv_obj_set_align(ui_acopleDesconectadoImage3, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_acopleDesconectadoImage3, LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_remove_flag(ui_acopleDesconectadoImage3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(ui_acopleDesconectadoImage3, 17);
+
+    ui_sendDataContainer3 = lv_obj_create(ui_principalPanel3);
+    lv_obj_remove_style_all(ui_sendDataContainer3);
+    lv_obj_set_width(ui_sendDataContainer3, 50);
+    lv_obj_set_height(ui_sendDataContainer3, 50);
+    lv_obj_set_x(ui_sendDataContainer3, -75);
+    lv_obj_set_y(ui_sendDataContainer3, 1);
+    lv_obj_set_align(ui_sendDataContainer3, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_sendDataContainer3, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_sendDataImage3 = lv_image_create(ui_sendDataContainer3);
+    lv_image_set_src(ui_sendDataImage3, &ui_img_send_data_png);
+    lv_obj_set_width(ui_sendDataImage3, 45);
+    lv_obj_set_height(ui_sendDataImage3, 35);
+    lv_obj_set_align(ui_sendDataImage3, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_sendDataImage3, LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_remove_flag(ui_sendDataImage3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(ui_sendDataImage3, 15);
 
     ui_configuracionPanel = lv_obj_create(ui_configScreen);
     lv_obj_set_width(ui_configuracionPanel, 280);
@@ -143,11 +255,11 @@ void ui_configScreen_screen_init(void)
     lv_obj_set_align(ui_pocentajeBrilloPanel, LV_ALIGN_CENTER);
     lv_obj_remove_flag(ui_pocentajeBrilloPanel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
-    ui_Label2 = lv_label_create(ui_pocentajeBrilloPanel);
-    lv_obj_set_width(ui_Label2, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Label2, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_Label2, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label2, "text");
+    ui_porcentajeLabel = lv_label_create(ui_pocentajeBrilloPanel);
+    lv_obj_set_width(ui_porcentajeLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_porcentajeLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_porcentajeLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_porcentajeLabel, "text");
 
     ui_controlBrilloPanel = lv_obj_create(ui_brilloPanContainer2);
     lv_obj_set_width(ui_controlBrilloPanel, 225);
@@ -170,24 +282,24 @@ void ui_configScreen_screen_init(void)
     //Compensating for LVGL9.1 draw crash with bar/slider max value when top-padding is nonzero and right-padding is 0
     if(lv_obj_get_style_pad_top(ui_controlSlider, LV_PART_MAIN) > 0) lv_obj_set_style_pad_right(ui_controlSlider,
                                                                                                     lv_obj_get_style_pad_right(ui_controlSlider, LV_PART_MAIN) + 1, LV_PART_MAIN);
-    ui_Button3 = lv_button_create(ui_configScreen);
-    lv_obj_set_width(ui_Button3, 100);
-    lv_obj_set_height(ui_Button3, 50);
-    lv_obj_set_x(ui_Button3, 0);
-    lv_obj_set_y(ui_Button3, 207);
-    lv_obj_set_align(ui_Button3, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_Button3, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
-    lv_obj_remove_flag(ui_Button3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_radius(ui_Button3, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_backButton3 = lv_button_create(ui_configScreen);
+    lv_obj_set_width(ui_backButton3, 100);
+    lv_obj_set_height(ui_backButton3, 50);
+    lv_obj_set_x(ui_backButton3, 0);
+    lv_obj_set_y(ui_backButton3, 207);
+    lv_obj_set_align(ui_backButton3, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_backButton3, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_remove_flag(ui_backButton3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_radius(ui_backButton3, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_backLabel2 = lv_label_create(ui_Button3);
-    lv_obj_set_width(ui_backLabel2, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_backLabel2, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_backLabel2, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_backLabel2, "Regresar");
-    lv_obj_set_style_text_font(ui_backLabel2, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_backLabel3 = lv_label_create(ui_backButton3);
+    lv_obj_set_width(ui_backLabel3, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_backLabel3, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_backLabel3, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_backLabel3, "Regresar");
+    lv_obj_set_style_text_font(ui_backLabel3, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_add_event_cb(ui_Button3, ui_event_Button3, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_backButton3, ui_event_backButton3, LV_EVENT_ALL, NULL);
 
 }
 
@@ -198,7 +310,18 @@ void ui_configScreen_screen_destroy(void)
     // NULL screen variables
     ui_configScreen = NULL;
     ui_principalPanel3 = NULL;
-    ui_principalLabel3 = NULL;
+    ui_principalLabel4 = NULL;
+    ui_EstadoBateriaContainer3 = NULL;
+    ui_batCargandoImage3 = NULL;
+    ui_bat0Image3 = NULL;
+    ui_bat25Image3 = NULL;
+    ui_bat50Image3 = NULL;
+    ui_bat75Image3 = NULL;
+    ui_bat100Image3 = NULL;
+    ui_EstadoAcopleContainer3 = NULL;
+    ui_acopleDesconectadoImage3 = NULL;
+    ui_sendDataContainer3 = NULL;
+    ui_sendDataImage3 = NULL;
     ui_configuracionPanel = NULL;
     ui_configuracionesLabel = NULL;
     ui_bleContainer = NULL;
@@ -209,10 +332,10 @@ void ui_configScreen_screen_destroy(void)
     ui_brilloPanContainer2 = NULL;
     ui_brilloLabel = NULL;
     ui_pocentajeBrilloPanel = NULL;
-    ui_Label2 = NULL;
+    ui_porcentajeLabel = NULL;
     ui_controlBrilloPanel = NULL;
     ui_controlSlider = NULL;
-    ui_Button3 = NULL;
-    ui_backLabel2 = NULL;
+    ui_backButton3 = NULL;
+    ui_backLabel3 = NULL;
 
 }
