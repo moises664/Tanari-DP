@@ -14,9 +14,10 @@ lv_obj_t * ui_batPorcentajeLabel = NULL;
 lv_obj_t * ui_EstadoAcopleContainer = NULL;
 lv_obj_t * ui_offAcoplePanel = NULL;
 lv_obj_t * ui_onAcoplePanel = NULL;
-lv_obj_t * ui_sendDataContainer = NULL;
+lv_obj_t * ui_sendBLEContainer = NULL;
 lv_obj_t * ui_offBLEPanel = NULL;
-lv_obj_t * ui_onBLEPanel = NULL;
+lv_obj_t * ui_desconectadoBLEPanel = NULL;
+lv_obj_t * ui_conectadoBLEPanel = NULL;
 lv_obj_t * ui_menuPanel = NULL;
 lv_obj_t * ui_configuracionesLabel2 = NULL;
 lv_obj_t * ui_homeButton = NULL;
@@ -138,17 +139,17 @@ void ui_homeScreen_screen_init(void)
     lv_obj_set_style_bg_color(ui_onAcoplePanel, lv_color_hex(0xF12D11), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_onAcoplePanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_sendDataContainer = lv_obj_create(ui_principalPanel);
-    lv_obj_remove_style_all(ui_sendDataContainer);
-    lv_obj_set_width(ui_sendDataContainer, 40);
-    lv_obj_set_height(ui_sendDataContainer, 35);
-    lv_obj_set_x(ui_sendDataContainer, -90);
-    lv_obj_set_y(ui_sendDataContainer, 1);
-    lv_obj_set_align(ui_sendDataContainer, LV_ALIGN_CENTER);
-    lv_obj_remove_flag(ui_sendDataContainer, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_sendBLEContainer = lv_obj_create(ui_principalPanel);
+    lv_obj_remove_style_all(ui_sendBLEContainer);
+    lv_obj_set_width(ui_sendBLEContainer, 40);
+    lv_obj_set_height(ui_sendBLEContainer, 35);
+    lv_obj_set_x(ui_sendBLEContainer, -90);
+    lv_obj_set_y(ui_sendBLEContainer, 1);
+    lv_obj_set_align(ui_sendBLEContainer, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_sendBLEContainer, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
-    ui_offBLEPanel = lv_obj_create(ui_sendDataContainer);
-    lv_obj_set_width(ui_offBLEPanel, 25);
+    ui_offBLEPanel = lv_obj_create(ui_sendBLEContainer);
+    lv_obj_set_width(ui_offBLEPanel, 30);
     lv_obj_set_height(ui_offBLEPanel, 25);
     lv_obj_set_align(ui_offBLEPanel, LV_ALIGN_CENTER);
     lv_obj_remove_flag(ui_offBLEPanel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -156,15 +157,23 @@ void ui_homeScreen_screen_init(void)
     lv_obj_set_style_bg_color(ui_offBLEPanel, lv_color_hex(0xE1DADA), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_offBLEPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_onBLEPanel = lv_obj_create(ui_sendDataContainer);
-    lv_obj_set_width(ui_onBLEPanel, 25);
-    lv_obj_set_height(ui_onBLEPanel, 25);
-    lv_obj_set_align(ui_onBLEPanel, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_onBLEPanel, LV_OBJ_FLAG_HIDDEN);     /// Flags
-    lv_obj_remove_flag(ui_onBLEPanel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_radius(ui_onBLEPanel, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_onBLEPanel, lv_color_hex(0x22EA41), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_onBLEPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_desconectadoBLEPanel = lv_obj_create(ui_sendBLEContainer);
+    lv_obj_set_width(ui_desconectadoBLEPanel, 30);
+    lv_obj_set_height(ui_desconectadoBLEPanel, 25);
+    lv_obj_set_align(ui_desconectadoBLEPanel, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_desconectadoBLEPanel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_radius(ui_desconectadoBLEPanel, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_desconectadoBLEPanel, lv_color_hex(0xF3FF05), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_desconectadoBLEPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_conectadoBLEPanel = lv_obj_create(ui_sendBLEContainer);
+    lv_obj_set_width(ui_conectadoBLEPanel, 30);
+    lv_obj_set_height(ui_conectadoBLEPanel, 25);
+    lv_obj_set_align(ui_conectadoBLEPanel, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_conectadoBLEPanel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_radius(ui_conectadoBLEPanel, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_conectadoBLEPanel, lv_color_hex(0x22EA41), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_conectadoBLEPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_menuPanel = lv_obj_create(ui_homeScreen);
     lv_obj_set_width(ui_menuPanel, 280);
@@ -260,9 +269,10 @@ void ui_homeScreen_screen_destroy(void)
     ui_EstadoAcopleContainer = NULL;
     ui_offAcoplePanel = NULL;
     ui_onAcoplePanel = NULL;
-    ui_sendDataContainer = NULL;
+    ui_sendBLEContainer = NULL;
     ui_offBLEPanel = NULL;
-    ui_onBLEPanel = NULL;
+    ui_desconectadoBLEPanel = NULL;
+    ui_conectadoBLEPanel = NULL;
     ui_menuPanel = NULL;
     ui_configuracionesLabel2 = NULL;
     ui_homeButton = NULL;
