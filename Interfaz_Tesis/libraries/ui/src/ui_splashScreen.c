@@ -6,7 +6,7 @@
 #include "ui.h"
 
 lv_obj_t * ui_splashScreen = NULL;
-lv_obj_t * ui_bienvenidoImagen = NULL;
+lv_obj_t * ui_welcomeBgImage = NULL;
 lv_obj_t * ui_bienvenidosLabel = NULL;
 lv_obj_t * ui_aLabel = NULL;
 lv_obj_t * ui_tanariDPLabel = NULL;
@@ -29,14 +29,14 @@ void ui_splashScreen_screen_init(void)
     ui_splashScreen = lv_obj_create(NULL);
     lv_obj_remove_flag(ui_splashScreen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
-    ui_bienvenidoImagen = lv_image_create(ui_splashScreen);
-    lv_image_set_src(ui_bienvenidoImagen, &ui_img_1571022687);
-    lv_obj_set_width(ui_bienvenidoImagen, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_bienvenidoImagen, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_bienvenidoImagen, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_bienvenidoImagen, LV_OBJ_FLAG_CLICKABLE);     /// Flags
-    lv_obj_remove_flag(ui_bienvenidoImagen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_image_set_scale(ui_bienvenidoImagen, 330);
+    ui_welcomeBgImage = lv_image_create(ui_splashScreen);
+    lv_image_set_src(ui_welcomeBgImage, &ui_img_welcomebg_320x480_original_11zon_png);
+    lv_obj_set_width(ui_welcomeBgImage, 320);
+    lv_obj_set_height(ui_welcomeBgImage, 480);
+    lv_obj_set_align(ui_welcomeBgImage, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_welcomeBgImage, LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_remove_flag(ui_welcomeBgImage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_image_set_scale(ui_welcomeBgImage, 360);
 
     ui_bienvenidosLabel = lv_label_create(ui_splashScreen);
     lv_obj_set_width(ui_bienvenidosLabel, LV_SIZE_CONTENT);   /// 1
@@ -101,7 +101,7 @@ void ui_splashScreen_screen_destroy(void)
 
     // NULL screen variables
     ui_splashScreen = NULL;
-    ui_bienvenidoImagen = NULL;
+    ui_welcomeBgImage = NULL;
     ui_bienvenidosLabel = NULL;
     ui_aLabel = NULL;
     ui_tanariDPLabel = NULL;

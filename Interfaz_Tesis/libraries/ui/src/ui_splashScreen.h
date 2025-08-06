@@ -14,7 +14,7 @@ extern "C" {
 extern void ui_splashScreen_screen_init(void);
 extern void ui_splashScreen_screen_destroy(void);
 extern lv_obj_t * ui_splashScreen;
-extern lv_obj_t * ui_bienvenidoImagen;
+extern lv_obj_t * ui_welcomeBgImage;
 extern lv_obj_t * ui_bienvenidosLabel;
 extern lv_obj_t * ui_aLabel;
 extern lv_obj_t * ui_tanariDPLabel;
