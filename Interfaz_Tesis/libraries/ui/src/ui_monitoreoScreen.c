@@ -14,9 +14,10 @@ lv_obj_t * ui_batPorcentajeLabel2 = NULL;
 lv_obj_t * ui_EstadoAcopleContainer2 = NULL;
 lv_obj_t * ui_offAcoplePanel2 = NULL;
 lv_obj_t * ui_onAcoplePanel2 = NULL;
-lv_obj_t * ui_sendDataContainer2 = NULL;
+lv_obj_t * ui_sendBLEContainer2 = NULL;
 lv_obj_t * ui_offBLEPanel2 = NULL;
-lv_obj_t * ui_onBLEPanel2 = NULL;
+lv_obj_t * ui_desconectadoBLEPanel2 = NULL;
+lv_obj_t * ui_conectadoBLEPanel2 = NULL;
 lv_obj_t * ui_monitoreoPanel = NULL;
 lv_obj_t * ui_monitoreoLabel = NULL;
 lv_obj_t * ui_CO2Container = NULL;
@@ -168,16 +169,16 @@ void ui_monitoreoScreen_screen_init(void)
     lv_obj_set_style_bg_color(ui_onAcoplePanel2, lv_color_hex(0xF12D11), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_onAcoplePanel2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_sendDataContainer2 = lv_obj_create(ui_principalPanel2);
-    lv_obj_remove_style_all(ui_sendDataContainer2);
-    lv_obj_set_width(ui_sendDataContainer2, 40);
-    lv_obj_set_height(ui_sendDataContainer2, 35);
-    lv_obj_set_x(ui_sendDataContainer2, -90);
-    lv_obj_set_y(ui_sendDataContainer2, 1);
-    lv_obj_set_align(ui_sendDataContainer2, LV_ALIGN_CENTER);
-    lv_obj_remove_flag(ui_sendDataContainer2, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_sendBLEContainer2 = lv_obj_create(ui_principalPanel2);
+    lv_obj_remove_style_all(ui_sendBLEContainer2);
+    lv_obj_set_width(ui_sendBLEContainer2, 40);
+    lv_obj_set_height(ui_sendBLEContainer2, 35);
+    lv_obj_set_x(ui_sendBLEContainer2, -90);
+    lv_obj_set_y(ui_sendBLEContainer2, 1);
+    lv_obj_set_align(ui_sendBLEContainer2, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_sendBLEContainer2, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
-    ui_offBLEPanel2 = lv_obj_create(ui_sendDataContainer2);
+    ui_offBLEPanel2 = lv_obj_create(ui_sendBLEContainer2);
     lv_obj_set_width(ui_offBLEPanel2, 25);
     lv_obj_set_height(ui_offBLEPanel2, 25);
     lv_obj_set_align(ui_offBLEPanel2, LV_ALIGN_CENTER);
@@ -186,15 +187,24 @@ void ui_monitoreoScreen_screen_init(void)
     lv_obj_set_style_bg_color(ui_offBLEPanel2, lv_color_hex(0xE1DADA), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_offBLEPanel2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_onBLEPanel2 = lv_obj_create(ui_sendDataContainer2);
-    lv_obj_set_width(ui_onBLEPanel2, 25);
-    lv_obj_set_height(ui_onBLEPanel2, 25);
-    lv_obj_set_align(ui_onBLEPanel2, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_onBLEPanel2, LV_OBJ_FLAG_HIDDEN);     /// Flags
-    lv_obj_remove_flag(ui_onBLEPanel2, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_radius(ui_onBLEPanel2, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_onBLEPanel2, lv_color_hex(0x22EA41), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_onBLEPanel2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_desconectadoBLEPanel2 = lv_obj_create(ui_sendBLEContainer2);
+    lv_obj_set_width(ui_desconectadoBLEPanel2, 25);
+    lv_obj_set_height(ui_desconectadoBLEPanel2, 25);
+    lv_obj_set_align(ui_desconectadoBLEPanel2, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_desconectadoBLEPanel2, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_radius(ui_desconectadoBLEPanel2, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_desconectadoBLEPanel2, lv_color_hex(0xF49202), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_desconectadoBLEPanel2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_conectadoBLEPanel2 = lv_obj_create(ui_sendBLEContainer2);
+    lv_obj_set_width(ui_conectadoBLEPanel2, 25);
+    lv_obj_set_height(ui_conectadoBLEPanel2, 25);
+    lv_obj_set_align(ui_conectadoBLEPanel2, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_conectadoBLEPanel2, LV_OBJ_FLAG_HIDDEN);     /// Flags
+    lv_obj_remove_flag(ui_conectadoBLEPanel2, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_radius(ui_conectadoBLEPanel2, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_conectadoBLEPanel2, lv_color_hex(0x22EA41), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_conectadoBLEPanel2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_monitoreoPanel = lv_obj_create(ui_monitoreoScreen);
     lv_obj_set_width(ui_monitoreoPanel, 280);
@@ -384,9 +394,10 @@ void ui_monitoreoScreen_screen_destroy(void)
     ui_EstadoAcopleContainer2 = NULL;
     ui_offAcoplePanel2 = NULL;
     ui_onAcoplePanel2 = NULL;
-    ui_sendDataContainer2 = NULL;
+    ui_sendBLEContainer2 = NULL;
     ui_offBLEPanel2 = NULL;
-    ui_onBLEPanel2 = NULL;
+    ui_desconectadoBLEPanel2 = NULL;
+    ui_conectadoBLEPanel2 = NULL;
     ui_monitoreoPanel = NULL;
     ui_monitoreoLabel = NULL;
     ui_CO2Container = NULL;

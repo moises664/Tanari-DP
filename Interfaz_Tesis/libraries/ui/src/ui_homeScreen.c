@@ -149,7 +149,7 @@ void ui_homeScreen_screen_init(void)
     lv_obj_remove_flag(ui_sendBLEContainer, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
     ui_offBLEPanel = lv_obj_create(ui_sendBLEContainer);
-    lv_obj_set_width(ui_offBLEPanel, 30);
+    lv_obj_set_width(ui_offBLEPanel, 25);
     lv_obj_set_height(ui_offBLEPanel, 25);
     lv_obj_set_align(ui_offBLEPanel, LV_ALIGN_CENTER);
     lv_obj_remove_flag(ui_offBLEPanel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -158,18 +158,19 @@ void ui_homeScreen_screen_init(void)
     lv_obj_set_style_bg_opa(ui_offBLEPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_desconectadoBLEPanel = lv_obj_create(ui_sendBLEContainer);
-    lv_obj_set_width(ui_desconectadoBLEPanel, 30);
+    lv_obj_set_width(ui_desconectadoBLEPanel, 25);
     lv_obj_set_height(ui_desconectadoBLEPanel, 25);
     lv_obj_set_align(ui_desconectadoBLEPanel, LV_ALIGN_CENTER);
     lv_obj_remove_flag(ui_desconectadoBLEPanel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_radius(ui_desconectadoBLEPanel, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_desconectadoBLEPanel, lv_color_hex(0xF3FF05), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_desconectadoBLEPanel, lv_color_hex(0xF49202), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_desconectadoBLEPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_conectadoBLEPanel = lv_obj_create(ui_sendBLEContainer);
-    lv_obj_set_width(ui_conectadoBLEPanel, 30);
+    lv_obj_set_width(ui_conectadoBLEPanel, 25);
     lv_obj_set_height(ui_conectadoBLEPanel, 25);
     lv_obj_set_align(ui_conectadoBLEPanel, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_conectadoBLEPanel, LV_OBJ_FLAG_HIDDEN);     /// Flags
     lv_obj_remove_flag(ui_conectadoBLEPanel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_radius(ui_conectadoBLEPanel, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_conectadoBLEPanel, lv_color_hex(0x22EA41), LV_PART_MAIN | LV_STATE_DEFAULT);
