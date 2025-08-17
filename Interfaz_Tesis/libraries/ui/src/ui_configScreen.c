@@ -96,7 +96,7 @@ void ui_configScreen_screen_init(void)
     lv_obj_set_x(ui_batPorcentajeLabel3, -1);
     lv_obj_set_y(ui_batPorcentajeLabel3, 0);
     lv_obj_set_align(ui_batPorcentajeLabel3, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_batPorcentajeLabel3, "text");
+    lv_label_set_text(ui_batPorcentajeLabel3, "");
     lv_obj_set_style_text_color(ui_batPorcentajeLabel3, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_batPorcentajeLabel3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_batPorcentajeLabel3, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -125,7 +125,7 @@ void ui_configScreen_screen_init(void)
     lv_obj_set_align(ui_onAcoplePanel3, LV_ALIGN_CENTER);
     lv_obj_remove_flag(ui_onAcoplePanel3, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_radius(ui_onAcoplePanel3, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_onAcoplePanel3, lv_color_hex(0xF12D11), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_onAcoplePanel3, lv_color_hex(0x22EA41), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_onAcoplePanel3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_sendBLEContainer3 = lv_obj_create(ui_principalPanel3);

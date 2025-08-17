@@ -31,18 +31,18 @@
 /***********************************************
  * SECCIÓN DE INCLUSIÓN DE BIBLIOTECAS
  ***********************************************/
-#include <lvgl.h>               // Librería para interfaz gráfica (versión 9.1.0)
-#include <TFT_eSPI.h>           // Controlador de pantalla TFT
-#include <ui.h>                 // Interfaz de usuario generada por SquareLine Studio
-#include <Arduino.h>            // Funciones básicas de Arduino
-#include <Wire.h>               // Comunicación I2C para sensores
-#include <SensirionI2cScd4x.h>  // Driver para sensor SCD41
-#include <BLEDevice.h>          // Funcionalidad BLE (Bluetooth Low Energy)
+#include <lvgl.h>              // Librería para interfaz gráfica (versión 9.1.0)
+#include <TFT_eSPI.h>          // Controlador de pantalla TFT
+#include <ui.h>                // Interfaz de usuario generada por SquareLine Studio
+#include <Arduino.h>           // Funciones básicas de Arduino
+#include <Wire.h>              // Comunicación I2C para sensores
+#include <SensirionI2cScd4x.h> // Driver para sensor SCD41
+#include <BLEDevice.h>         // Funcionalidad BLE (Bluetooth Low Energy)
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
-#include <HardwareSerial.h>     // Comunicación serial UART
-#include <driver/ledc.h>        // Control PWM para gestión de brillo
+#include <HardwareSerial.h>    // Comunicación serial UART
+#include <driver/ledc.h>       // Control PWM para gestión de brillo
 
 /***********************************************
  * DEFINICIONES DE HARDWARE Y CONFIGURACIONES
@@ -50,48 +50,63 @@
 // UUIDs para servicio BLE personalizado
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID_NOTIFY "beb5483e-36e1-4688-b7f5-ea07361b26a9"
-#define NO_ERROR 0  // Código de operación exitosa
+#define NO_ERROR 0   // Código de operación exitosa
 
 // Configuración de brillo de pantalla
-#define BACKLIGHT_PIN 45        // GPIO para control de backlight
+#define BACKLIGHT_PIN 45      // GPIO para control de backlight
 #define PWM_CHANNEL LEDC_CHANNEL_0
 #define PWM_TIMER LEDC_TIMER_0
-#define PWM_FREQ 5000           // Frecuencia PWM en Hz (óptima para pantallas)
+#define PWM_FREQ 5000         // Frecuencia PWM en Hz (óptima para pantallas)
 #define PWM_RESOLUTION LEDC_TIMER_13_BIT // 8192 niveles de brillo (13 bits)
-#define MIN_DUTY_VALUE 100      // Valor mínimo para evitar apagado completo
-#define MAX_DUTY_VALUE 8191     // Valor máximo (2^13 - 1)
+#define MIN_DUTY_VALUE 100    // Valor mínimo para evitar apagado completo
+#define MAX_DUTY_VALUE 8191   // Valor máximo (2^13 - 1)
 
 // Configuración de medición de batería
-#define BATTERY_ADC_PIN 6       // GPIO6 para lectura ADC
+#define BATTERY_ADC_PIN 6     // GPIO6 para lectura ADC
 #define BATTERY_CONTROL_PIN 5   // GPIO5 para control de transistor
 #define BATTERY_FULL_VOLTAGE 4.2f // Voltaje al 100% de carga (LiPo)
 #define BATTERY_EMPTY_VOLTAGE 2.6f // Voltaje al 0% de carga
-#define ADC_REF_VOLTAGE 3.3f    // Voltaje de referencia del ADC
+#define ADC_REF_VOLTAGE 3.3f   // Voltaje de referencia del ADC
 #define ADC_RESOLUTION 4095.0f  // Resolución de 12 bits (0-4095)
+
+// === MODIFICACIONES PARA EL ACOPLE ===
+#define ACOPLE_INDICATOR_PIN 10 // Pin indicador para el acople físico
+#define HANDSHAKE_TIMEOUT_MS 1000 // Tiempo de espera para handshake inicial
+#define KEEPALIVE_INTERVAL_MS 1000 // Intervalo de envío de mensajes de estado (1 segundo)
+#define DISCONNECT_TIMEOUT_MS 2000 // Tiempo de espera para asumir desconexión (2 segundos)
+// =====================================
 
 /***********************************************
  * NAMESPACES PARA GESTIÓN DE ESTADOS GLOBALES
  ***********************************************/
 namespace Sensor {
-  bool dataReady = false;       // Bandera de datos disponibles del SCD41
-  bool ErrorSCD = false;        // Estado de error del sensor SCD41
-  int16_t error;                // Código de error específico
-  uint16_t co2Concentration;    // CO2 en ppm
-  float temperature;            // Temperatura en °C
-  float relativeHumidity;       // Humedad relativa en %
-  const double RL = 30;         // Resistencia de carga para MQ-4
+  bool dataReady = false;      // Bandera de datos disponibles del SCD41
+  bool ErrorSCD = false;      // Estado de error del sensor SCD41
+  int16_t error;               // Código de error específico
+  uint16_t co2Concentration;   // CO2 en ppm
+  float temperature;           // Temperatura en °C
+  float relativeHumidity;      // Humedad relativa en %
+  const double RL = 30;          // Resistencia de carga para MQ-4
   const int Ch4_pin = 1;        // Pin analógico para MQ-4 (GPIO1)
-  double Ro = 3240;             // Resistencia en aire limpio (valor calibrado)
-  double CH4_ppm = 0;           // Concentración de Metano en ppm
+  double Ro = 3240;            // Resistencia en aire limpio (valor calibrado)
+  double CH4_ppm = 0;          // Concentración de Metano en ppm
 }
 
 namespace Comms {
   bool bleConnected = false;    // Estado de conexión BLE activa
-  bool Acople = true;           // Habilitar transmisión UART
+  // bool Acople = true;           // Habilitar transmisión UART - MODIFICACIÓN: variable ahora controlada por la lógica de handshake
+  bool Acople = false; // Se inicializa en false
   bool bleEnabled = false;      // Estado de módulo BLE habilitado
   BLEServer *pServer = NULL;    // Instancia de servidor BLE
   BLECharacteristic *pCharacteristicNotify; // Característica BLE para notificaciones
   BLEAdvertising *pAdvertising; // Objeto para publicidad BLE
+  
+  // === MODIFICACIONES PARA EL ACOPLE ===
+  enum AcopleState { DESCONECTADO, CONECTANDO, CONECTADO }; // Estados de la máquina de estados
+  AcopleState acopleState = DESCONECTADO; // Estado inicial
+  unsigned long lastAcopleTxMillis = 0;   // Último tiempo de envío de mensaje keep-alive
+  unsigned long lastAcopleRxMillis = 0;   // Último tiempo de recepción de mensaje keep-alive
+  // =====================================
 }
 
 namespace Display {
@@ -104,8 +119,8 @@ namespace Display {
 }
 
 namespace Power {
-  float batteryVoltage = 0.0f;  // Voltaje actual de batería
-  int batteryPercentage = 0;    // Porcentaje de carga calculado (0-100%)
+  float batteryVoltage = 0.0f;   // Voltaje actual de batería
+  int batteryPercentage = 0;     // Porcentaje de carga calculado (0-100%)
 }
 
 // Declaración adelantada de función
@@ -297,25 +312,16 @@ SensirionI2cScd4x scd4x;
  * @note Verifica disponibilidad de datos antes de leer
  */
 void LeerCO2() {
-  bool localDataReady = false;
-  // Verificar si hay datos nuevos disponibles
-  Sensor::error = scd4x.getDataReadyStatus(localDataReady);
-
-  if (Sensor::error != NO_ERROR) {
-    Sensor::ErrorSCD = true;  // Marcar error
-    return;
-  }
-
-  if (localDataReady) {
-    // Leer mediciones actuales
-    Sensor::error = scd4x.readMeasurement(
-      Sensor::co2Concentration,
-      Sensor::temperature,
-      Sensor::relativeHumidity);
-    // Actualizar estado de error
-    Sensor::ErrorSCD = (Sensor::error != NO_ERROR);
-    Sensor::dataReady = localDataReady;  // Confirmar lectura
-  }
+  Sensor::error = scd4x.getDataReadyStatus(Sensor::dataReady);  
+    if (Sensor::error == NO_ERROR && Sensor::dataReady){
+      if (scd4x.readMeasurement(Sensor::co2Concentration, Sensor::temperature, Sensor::relativeHumidity) == NO_ERROR){
+           Sensor::ErrorSCD = false;
+      } else {
+              Sensor::ErrorSCD = true;
+      }
+    } else {
+              Sensor::ErrorSCD = true;
+    }
 }
 
 /***********************************************
@@ -379,10 +385,10 @@ void updateBatteryIndicator() {
 
 /**
  * @brief Actualiza indicadores de estado de acople
- * @note Actualmente simulado (pendiente de integración con UGV)
+ * @note Ahora depende de la lógica de comunicación serial
  */
 void updateAcopleIndicator() {
-  bool acopleConnected = false; // Simulación - cambiar cuando se integre UGV
+  bool acopleConnected = Comms::Acople; 
   
   // Actualizar estado en todas las pantallas
   if(acopleConnected) {
@@ -465,6 +471,68 @@ void updateBLEStatusLabel() {
   updateBLEIndicators(); // Sincronizar indicadores visuales
 }
 
+// === NUEVA FUNCIÓN PARA GESTIONAR LA COMUNICACIÓN DEL ACOPLE ===
+void handleAcopleComms() {
+  switch (Comms::acopleState) {
+    case Comms::DESCONECTADO:
+      // Esperar el mensaje de inicio 'c' del UGV
+      if (Serial2.available() > 0) {
+        char incomingChar = Serial2.read();
+        if (incomingChar == 'c') {
+          Serial.println("Mensaje 'c' recibido del UGV. Iniciando handshake...");
+          Serial2.print('?'); // Responder con '?'
+          Comms::acopleState = Comms::CONECTANDO;
+          Comms::lastAcopleRxMillis = millis(); // Iniciar timeout para la respuesta
+        }
+      }
+      break;
+
+    case Comms::CONECTANDO:
+      // Esperar la respuesta 's' del UGV
+      if (Serial2.available() > 0) {
+        char incomingChar = Serial2.read();
+        if (incomingChar == 's') {
+          Serial.println("Handshake exitoso. Conectado al UGV.");
+          Comms::acopleState = Comms::CONECTADO;
+          Comms::Acople = true; // Activar bandera de acople
+          Comms::lastAcopleRxMillis = millis(); // Resetear el tiempo de última recepción
+          Comms::lastAcopleTxMillis = millis(); // Resetear tiempo de envío para el keep-alive
+        }
+      }
+      // Timeout del handshake inicial
+      if (millis() - Comms::lastAcopleRxMillis > HANDSHAKE_TIMEOUT_MS) {
+        Serial.println("Handshake fallido: Timeout.");
+        Comms::acopleState = Comms::DESCONECTADO; // Volver al estado inicial
+      }
+      break;
+
+    case Comms::CONECTADO:
+      // Verificación de conexión periódica (Keep-Alive)
+      if (millis() - Comms::lastAcopleTxMillis > KEEPALIVE_INTERVAL_MS) {
+        Serial.println("Enviando '?' para verificar conexión...");
+        Serial2.print('?'); // Enviar '?' para solicitar estado
+        Comms::lastAcopleTxMillis = millis();
+      }
+
+      if (Serial2.available() > 0) {
+        char incomingChar = Serial2.read();
+        if (incomingChar == 's') {
+          Serial.println("Mensaje 's' recibido. Conexión activa.");
+          Comms::lastAcopleRxMillis = millis(); // Si recibimos 's', la conexión está viva
+        }
+      }
+
+      // Detectar desconexión por timeout
+      if (millis() - Comms::lastAcopleRxMillis > DISCONNECT_TIMEOUT_MS) {
+        Serial.println("Conexión al UGV perdida por timeout.");
+        Comms::acopleState = Comms::DESCONECTADO;
+        Comms::Acople = false; // Desactivar bandera de acople
+      }
+      break;
+  }
+}
+// =====================================
+
 /***********************************************
  * CONFIGURACIÓN INICIAL DEL SISTEMA (SETUP)
  ***********************************************/
@@ -477,6 +545,11 @@ void setup() {
   pinMode(BATTERY_CONTROL_PIN, OUTPUT);
   digitalWrite(BATTERY_CONTROL_PIN, LOW); // Iniciar con circuito desactivado
   pinMode(BATTERY_ADC_PIN, INPUT);
+
+  // === MODIFICACIÓN: Pin de acople para el UGV ===
+  pinMode(ACOPLE_INDICATOR_PIN, OUTPUT);
+  digitalWrite(ACOPLE_INDICATOR_PIN, HIGH); // Mantener en alto para que el UGV detecte la conexión
+  // =====================================
 
   // ===== INICIALIZACIÓN DE SENSORES =====
   Wire.begin(); // Iniciar comunicación I2C
@@ -589,6 +662,12 @@ void setup() {
     updateAcopleIndicator();
     updateBLEIndicators();
   }, 1000, NULL);
+
+  // === NUEVO: Temporizador para la lógica del acople (handshake y keep-alive) ===
+  lv_timer_create([](lv_timer_t *timer) {
+    handleAcopleComms();
+  }, 100, NULL); // Se ejecuta cada 100ms
+  // =====================================
 }
 
 /***********************************************
@@ -598,21 +677,27 @@ void loop() {
   // ===== TRANSMISIÓN DE DATOS POR BLE =====
   if (Comms::bleEnabled && Comms::bleConnected && !Sensor::ErrorSCD) {
     String datosTX = String(Sensor::co2Concentration) + ";" + 
-                    String(Sensor::CH4_ppm) + ";" + 
-                    String(Sensor::temperature) + ";" + 
-                    String(Sensor::relativeHumidity);
+                     String(Sensor::CH4_ppm) + ";" + 
+                     String(Sensor::temperature) + ";" + 
+                     String(Sensor::relativeHumidity);
     Comms::pCharacteristicNotify->setValue(datosTX.c_str());
     Comms::pCharacteristicNotify->notify(); // Enviar a dispositivos conectados
+     Serial.println("Se envio BLE");
+     Sensor::ErrorSCD = true;
   }
-
+   digitalWrite(ACOPLE_INDICATOR_PIN, HIGH);
   // ===== TRANSMISIÓN POR UART (PARA ACOPLE) =====
-  if (Comms::Acople && !Sensor::ErrorSCD) {
+  // === MODIFICACIÓN: Usamos '&&' para la condición ===
+  // Se enviarán datos por UART solo si hay acople y el BLE está desconectado
+  if (Comms::Acople && !Comms::bleConnected && !Sensor::ErrorSCD) {
     String datosTX = String(Sensor::co2Concentration) + ";" + 
-                    String(Sensor::CH4_ppm) + ";" + 
-                    String(Sensor::temperature) + ";" + 
-                    String(Sensor::relativeHumidity);
+                     String(Sensor::CH4_ppm) + ";" + 
+                     String(Sensor::temperature) + ";" + 
+                     String(Sensor::relativeHumidity);
     Serial2.println(datosTX); // Enviar por Serial2
+    Sensor::ErrorSCD = true;
   }
+  // =====================================
 
   // ===== LECTURA PERIÓDICA DE BATERÍA =====
   static uint32_t lastBatteryRead = 0;
