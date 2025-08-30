@@ -1,30 +1,25 @@
 /***********************************************
- * TANARI DP - VERSIÓN 3.2 (Sistema de Monitoreo Avanzado)
- * 
- * Descripción: 
- *   Sistema portátil de monitoreo ambiental para medición de gases de efecto invernadero (CO2 y Metano),
- *   temperatura y humedad. Integra gestión de energía, interfaz gráfica avanzada y comunicación inalámbrica BLE.
- * 
- * Características principales:
- *   - Medición precisa de CO2 con sensor Sensirion SCD41
- *   - Detección de Metano con sensor MQ-4 calibrado
- *   - Circuito optimizado para medición de batería (ultra bajo consumo)
- *   - Interfaz gráfica fluida con LVGL y pantalla táctil ILI9488
- *   - Comunicación BLE 5.0 con notificaciones en tiempo real
- *   - Transmisión UART para integración con sistemas externos
- *   - Gestión dinámica de brillo de pantalla mediante PWM
- * 
- * Especificaciones técnicas:
- *   - Microcontrolador: ESP32-S3 WROON-1 R16N8
- *   - Pantalla: 3.5" táctil (320x480 píxeles)
- *   - Sensores: 
- *        - Sensirion SCD41 (CO2, temperatura, humedad)
- *        - MQ-4 (Metano)
- *   - Comunicación: BLE 5.0, UART (Serial2)
- *   - Alimentación: Batería LiPo 3.7V (rango operativo: 2.6V - 4.2V)
- * 
- * Autor: [Mendez. J  y  Rivera. M]
- * Fecha: [15-08-2025]
+ * TANARI DP - VERSIÓN 3.4 (Sistema de Monitoreo Avanzado + Telemetría de Batería)
+
+ * * Descripción: 
+ * Sistema portátil de monitoreo ambiental para medición de gases de efecto invernadero (CO2 y Metano),
+ * temperatura y humedad. Integra gestión de energía, interfaz gráfica avanzada y comunicación inalámbrica BLE.
+
+ * * Novedades v3.4 (Correcciones):
+ * - Se corrige y estabiliza la lectura del nivel de batería mediante promediado de ADC.
+ * - Se ajusta la fórmula del divisor de tensión a los valores de hardware correctos (R1=252k, R2=1.022M).
+ * - Se corrige la lógica del switch BLE para forzar la desconexión de cualquier cliente activo al apagarlo.
+ * * Características principales:
+ * - Medición precisa de CO2 con sensor Sensirion SCD41
+ * - Detección de Metano con sensor MQ-4 calibrado
+ * - Circuito optimizado para medición de batería (ultra bajo consumo)
+ * - Interfaz gráfica fluida con LVGL y pantalla táctil ILI9488
+ * - Comunicación BLE 5.0 con notificaciones en tiempo real
+ * - Transmisión UART para integración con sistemas externos
+ * - Gestión dinámica de brillo de pantalla mediante PWM
+ 
+ * * Autor: [Mendez. J  y  Rivera. M]
+ * Fecha: [20-08-2025]
  * Licencia: MIT
  ***********************************************/
 
@@ -61,13 +56,23 @@
 #define MIN_DUTY_VALUE 100    // Valor mínimo para evitar apagado completo
 #define MAX_DUTY_VALUE 8191   // Valor máximo (2^13 - 1)
 
-// Configuración de medición de batería
-#define BATTERY_ADC_PIN 6     // GPIO6 para lectura ADC
+// =================================================================================
+// INICIO: AJUSTES DE MEDICIÓN DE BATERÍA
+// =================================================================================
+#define BATTERY_ADC_PIN 6       // GPIO6 para lectura ADC
 #define BATTERY_CONTROL_PIN 5   // GPIO5 para control de transistor
 #define BATTERY_FULL_VOLTAGE 4.2f // Voltaje al 100% de carga (LiPo)
 #define BATTERY_EMPTY_VOLTAGE 2.6f // Voltaje al 0% de carga
-#define ADC_REF_VOLTAGE 3.3f   // Voltaje de referencia del ADC
+#define ADC_REF_VOLTAGE 3.3f    // Voltaje de referencia del ADC
 #define ADC_RESOLUTION 4095.0f  // Resolución de 12 bits (0-4095)
+#define ADC_SAMPLES 20          // Número de muestras para promediar y estabilizar la lectura
+
+// Valores del divisor de tensión para la batería
+const float R1_BAT = 252000.0f;  // Resistencia conectada a VBUS (252kΩ)
+const float R2_BAT = 1022000.0f; // Resistencia conectada a GND (1.022MΩ)
+// =================================================================================
+// FIN: AJUSTES DE MEDICIÓN DE BATERÍA
+// =================================================================================
 
 // === MODIFICACIONES PARA EL ACOPLE ===
 #define ACOPLE_INDICATOR_PIN 10 // Pin indicador para el acople físico
@@ -87,20 +92,24 @@ namespace Sensor {
   float temperature;           // Temperatura en °C
   float relativeHumidity;      // Humedad relativa en %
   const double RL = 30;          // Resistencia de carga para MQ-4
-  const int Ch4_pin = 1;        // Pin analógico para MQ-4 (GPIO1)
-  double Ro = 3240;            // Resistencia en aire limpio (valor calibrado)
+  const int Ch4_pin = 4;        // Pin analógico para MQ-4 (GPIO1)
+  double Ro = 284.6;            // Resistencia en aire limpio (valor calibrado)
   double CH4_ppm = 0;          // Concentración de Metano en ppm
+  float filtro_ADCSensor = 0;
+  float Alpha = 0.8;
+  float V_divisor;
+  const double R1_DIVISOR = 2200.0; // Resistencia conectada a la salida del sensor (Ohms)
+  const double R2_DIVISOR = 3300.0; // Resistencia conectada a GND (Ohms)
 }
 
 namespace Comms {
   bool bleConnected = false;    // Estado de conexión BLE activa
-  // bool Acople = true;           // Habilitar transmisión UART - MODIFICACIÓN: variable ahora controlada por la lógica de handshake
   bool Acople = false; // Se inicializa en false
   bool bleEnabled = false;      // Estado de módulo BLE habilitado
   BLEServer *pServer = NULL;    // Instancia de servidor BLE
   BLECharacteristic *pCharacteristicNotify; // Característica BLE para notificaciones
   BLEAdvertising *pAdvertising; // Objeto para publicidad BLE
-  
+  bool banderaindicador = 1;
   // === MODIFICACIONES PARA EL ACOPLE ===
   enum AcopleState { DESCONECTADO, CONECTANDO, CONECTADO }; // Estados de la máquina de estados
   AcopleState acopleState = DESCONECTADO; // Estado inicial
@@ -149,7 +158,7 @@ class MyServerCallbacks : public BLEServerCallbacks {
     Serial.println("BLE desconectado!");
     updateBLEStatusLabel();  // Actualizar UI inmediatamente
     
-    // Reiniciar publicidad si BLE sigue habilitado
+    // Reiniciar publicidad si BLE sigue habilitado por el usuario
     if (Comms::bleEnabled) {
       BLEDevice::startAdvertising();
     }
@@ -249,18 +258,38 @@ extern "C" {
     updateBLEStatusLabel();  // Actualizar UI
   }
 
+  // =================================================================================
+  // INICIO: FUNCIÓN BLEOff CORREGIDA
+  // =================================================================================
   /**
-   * @brief Deshabilita el módulo BLE
+   * @brief Deshabilita el módulo BLE y desconecta a cualquier cliente.
    */
   void BLEOff() {
     if (!Comms::bleEnabled) return;  // Evitar acciones redundantes
     Serial.println("Desactivando BLE...");
     Comms::pAdvertising->stop();  // Detener publicidad
+
+    // Lógica robusta para desconectar a todos los clientes conectados
+    if (Comms::pServer) {
+        int numConnected = Comms::pServer->getConnectedCount();
+        if (numConnected > 0) {
+            Serial.printf("Forzando desconexión de %d cliente(s)...\n", numConnected);
+            // Desconecta al primer cliente de la lista repetidamente
+            // hasta que no quede ninguno. La librería gestiona la lista interna.
+            for (int i = 0; i < numConnected; i++) {
+                Comms::pServer->disconnect(0);
+            }
+        }
+    }
+
     Comms::bleEnabled = false;
     Comms::bleConnected = false;  // Forzar estado desconectado
     Serial.println("BLE desactivado");
     updateBLEStatusLabel();  // Actualizar UI
   }
+  // =================================================================================
+  // FIN: FUNCIÓN BLEOff CORREGIDA
+  // =================================================================================
 }
 #endif
 
@@ -286,22 +315,61 @@ double mapear(double x, double x1, double x2, double y1, double y2) {
  */
 void LeerCH4() {
   double Slectura = 0;
-  // Promedio de 10 lecturas para reducir ruido
-  for (int i = 0; i < 10; i++) {
+  // Promedio de 100 lecturas para reducir ruido
+  for (int i = 0; i < 100; i++) {
     Slectura += analogRead(Sensor::Ch4_pin);
     delay(1);  // Pequeño delay entre lecturas
   }
   
-  double ADCsensorMQ = Slectura / 10.0;
-  // Convertir valor ADC a voltaje (0-3.3V)
-  double VsensorMQ = mapear(ADCsensorMQ, 0, 4095, 0, 3.3);
+  double ADCsensorMQ = Slectura / 100.0;
+  Sensor::filtro_ADCSensor = Sensor::Alpha * ADCsensorMQ + (1.0 - Sensor::Alpha) * Sensor::filtro_ADCSensor;
+  Sensor::V_divisor = Sensor::filtro_ADCSensor * (3.3 / 4095.0);
+  double VsensorMQ = Sensor::V_divisor * ((Sensor::R1_DIVISOR + Sensor::R2_DIVISOR) / Sensor::R2_DIVISOR);
+
+  if (VsensorMQ == 0) {
+    Serial.println("Error: Voltaje del sensor es cero. Imposible calcular Rs.");
+    delay(10);
+    return;
+  }
+  
   // Calcular resistencia del sensor en presencia de gas
-  double Rs = Sensor::RL * ((3.3 - VsensorMQ) / VsensorMQ);
+  double Rs = Sensor::RL * ((5.0 - VsensorMQ) / VsensorMQ);
+
+  double factor_ambiental = getCorrectionFactor(Sensor::temperature, Sensor::relativeHumidity);
+
+  //Calcular el R0 corregido para las condiciones actuales
+  double Ro_corregido = Sensor::Ro * factor_ambiental;
   // Calcular ratio Rs/Ro
-  double RatioMQ = Rs / Sensor::Ro;
+  double RatioMQ = Rs / Ro_corregido;
   // Calcular concentración (fórmula específica para MQ-4)
   double exponente = (-log10(RatioMQ) + 1.052) / 0.3512;
   Sensor::CH4_ppm = pow(10, exponente);  // Resultado en ppm
+}
+
+double getCorrectionFactor(float temperatureC, float humidity) {
+  // Ecuaciones polinómicas de segundo grado (y = ax^2 + bx + c) donde x es la temperatura
+  double factor_30RH = (0.00003 * pow(temperatureC, 2)) - (0.0153 * temperatureC) + 1.5641;
+  double factor_60RH = (0.00002 * pow(temperatureC, 2)) - (0.0128 * temperatureC) + 1.3253;
+  double factor_85RH = (0.00002 * pow(temperatureC, 2)) - (0.0112 * temperatureC) + 1.1539;
+
+  // Aplicar interpolación lineal
+  if (humidity <= 30) {
+    // Si la humedad es menor o igual a 30, usar la curva de 30% directamente
+    return factor_30RH;
+  } else if (humidity < 60) {
+    // Interpolar entre 30% y 60%
+    float H_baja = 30.0;
+    float H_alta = 60.0;
+    return factor_30RH + (factor_60RH - factor_30RH) * ((humidity - H_baja) / (H_alta - H_baja));
+  } else if (humidity < 85) {
+    // Interpolar entre 60% y 85%
+    float H_baja = 60.0;
+    float H_alta = 85.0;
+    return factor_60RH + (factor_85RH - factor_60RH) * ((humidity - H_baja) / (H_alta - H_baja));
+  } else { // humidity >= 85
+    // Si la humedad es mayor o igual a 85, usar la curva de 85% directamente
+    return factor_85RH;
+  }
 }
 
 // Instancia del sensor SCD41
@@ -345,30 +413,44 @@ void ActualizarPantalla() {
   lastUpdate = millis();  // Registrar último tiempo de actualización
 }
 
+// =================================================================================
+// INICIO: FUNCIÓN DE LECTURA DE BATERÍA CORREGIDA
+// =================================================================================
 /**
- * @brief Lee nivel de batería con circuito optimizado
- * @note Circuito se activa solo durante 150ms para minimizar consumo
+ * @brief Lee el nivel de batería de forma estable y precisa.
+ * @note Activa el circuito de medición, toma un promedio de lecturas ADC para
+ * filtrar ruido, calcula el voltaje real con el divisor de tensión
+ * y finalmente calcula el porcentaje de carga.
  */
 void readBatteryLevel() {
   // Activar circuito de medición
   digitalWrite(BATTERY_CONTROL_PIN, HIGH);
-  delay(150); // Esperar estabilización (tiempo característico del circuito)
-  
-  int adcValue = analogRead(BATTERY_ADC_PIN);
-  
-  // Desactivar circuito inmediatamente después de leer
+  delay(50); // Pequeño retardo para que el voltaje se estabilice
+
+  uint32_t adcSum = 0;
+  for (int i = 0; i < ADC_SAMPLES; i++) {
+    adcSum += analogRead(BATTERY_ADC_PIN);
+  }
+  // Desactivar circuito inmediatamente después de leer para ahorrar energía
   digitalWrite(BATTERY_CONTROL_PIN, LOW);
+
+  float adcAverage = (float)adcSum / ADC_SAMPLES;
+
+  // 1. Calcular el voltaje en el pin del ADC
+  float voltageAtAdc = (adcAverage / ADC_RESOLUTION) * ADC_REF_VOLTAGE;
+
+  // 2. Calcular el voltaje real de la batería usando la fórmula del divisor de tensión
+  Power::batteryVoltage = voltageAtAdc * (R1_BAT + R2_BAT) / R2_BAT;
+
+  // 3. Calcular el porcentaje de batería
+  float percentage = ((Power::batteryVoltage - BATTERY_EMPTY_VOLTAGE) / (BATTERY_FULL_VOLTAGE - BATTERY_EMPTY_VOLTAGE)) * 100.0f;
   
-  // Calcular voltaje real considerando divisor (R1=270K, R2=1M -> factor 1.27)
-  float voltage = (adcValue / ADC_RESOLUTION) * ADC_REF_VOLTAGE * 1.27f;
-  
-  // Calcular porcentaje (mapeo lineal entre 2.6V y 4.2V)
-  Power::batteryVoltage = voltage;
-  Power::batteryPercentage = constrain(
-    map(voltage * 100, BATTERY_EMPTY_VOLTAGE * 100, BATTERY_FULL_VOLTAGE * 100, 0, 100),
-    0, 100
-  );
+  // 4. Limitar el resultado entre 0 y 100
+  Power::batteryPercentage = constrain((int)percentage, 0, 100);
 }
+// =================================================================================
+// FIN: FUNCIÓN DE LECTURA DE BATERÍA CORREGIDA
+// =================================================================================
 
 /**
  * @brief Actualiza indicador de batería en todas las pantallas
@@ -392,7 +474,7 @@ void updateAcopleIndicator() {
   
   // Actualizar estado en todas las pantallas
   if(acopleConnected) {
-    // Estado "Conectado": mostrar panel verde, ocultar rojo
+    // Estado "Conectado": mostrar panel verde, ocultar gris
     lv_obj_clear_flag(ui_onAcoplePanel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui_offAcoplePanel, LV_OBJ_FLAG_HIDDEN);
     // Repetir para otras pantallas
@@ -401,7 +483,7 @@ void updateAcopleIndicator() {
     lv_obj_clear_flag(ui_onAcoplePanel3, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui_offAcoplePanel3, LV_OBJ_FLAG_HIDDEN);
   } else {
-    // Estado "Desconectado": mostrar panel rojo, ocultar verde
+    // Estado "Desconectado": mostrar panel gris, ocultar verde
     lv_obj_add_flag(ui_onAcoplePanel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(ui_offAcoplePanel, LV_OBJ_FLAG_HIDDEN);
     // Repetir para otras pantallas
@@ -443,7 +525,7 @@ void updateBLEIndicators() {
       lv_obj_add_flag(ui_desconectadoBLEPanel3, LV_OBJ_FLAG_HIDDEN);
       lv_obj_clear_flag(ui_conectadoBLEPanel3, LV_OBJ_FLAG_HIDDEN);
     } else {
-      // Estado DESCONECTADO: mostrar panel amarillo
+      // Estado DESCONECTADO (pero encendido): mostrar panel amarillo
       lv_obj_add_flag(ui_offBLEPanel, LV_OBJ_FLAG_HIDDEN);
       lv_obj_clear_flag(ui_desconectadoBLEPanel, LV_OBJ_FLAG_HIDDEN);
       lv_obj_add_flag(ui_conectadoBLEPanel, LV_OBJ_FLAG_HIDDEN);
@@ -550,6 +632,9 @@ void setup() {
   pinMode(ACOPLE_INDICATOR_PIN, OUTPUT);
   digitalWrite(ACOPLE_INDICATOR_PIN, HIGH); // Mantener en alto para que el UGV detecte la conexión
   // =====================================
+
+  pinMode(18 , OUTPUT);
+  digitalWrite(18, LOW);
 
   // ===== INICIALIZACIÓN DE SENSORES =====
   Wire.begin(); // Iniciar comunicación I2C
@@ -676,19 +761,34 @@ void setup() {
 void loop() {
   // ===== TRANSMISIÓN DE DATOS POR BLE =====
   if (Comms::bleEnabled && Comms::bleConnected && !Sensor::ErrorSCD) {
+    
+    // =================================================================================
+    // MODIFICACIÓN: Se añade el nivel de batería a la trama de datos.
+    // Nuevo formato: "CO2;CH4;Temp;Hum;Bat"
+    // =================================================================================
     String datosTX = String(Sensor::co2Concentration) + ";" + 
                      String(Sensor::CH4_ppm) + ";" + 
                      String(Sensor::temperature) + ";" + 
-                     String(Sensor::relativeHumidity);
+                     String(Sensor::relativeHumidity) + ";" +
+                     String(Power::batteryPercentage); // <-- NUEVO DATO AÑADIDO
+                     
     Comms::pCharacteristicNotify->setValue(datosTX.c_str());
     Comms::pCharacteristicNotify->notify(); // Enviar a dispositivos conectados
-     Serial.println("Se envio BLE");
-     Sensor::ErrorSCD = true;
+    Serial.println("Se envio BLE con datos de batería: " + datosTX);
+    Sensor::ErrorSCD = true;
   }
-   digitalWrite(ACOPLE_INDICATOR_PIN, HIGH);
+  digitalWrite(ACOPLE_INDICATOR_PIN, HIGH);
+
+  if (Comms::Acople && Comms::banderaindicador){ 
+   digitalWrite(18, HIGH);
+   Comms::banderaindicador = 0;
+  } 
+  
+  if(!Comms::Acople && !Comms::banderaindicador) {
+   digitalWrite(18, LOW);
+   Comms::banderaindicador = 1;
+  }
   // ===== TRANSMISIÓN POR UART (PARA ACOPLE) =====
-  // === MODIFICACIÓN: Usamos '&&' para la condición ===
-  // Se enviarán datos por UART solo si hay acople y el BLE está desconectado
   if (Comms::Acople && !Comms::bleConnected && !Sensor::ErrorSCD) {
     String datosTX = String(Sensor::co2Concentration) + ";" + 
                      String(Sensor::CH4_ppm) + ";" + 
@@ -696,16 +796,22 @@ void loop() {
                      String(Sensor::relativeHumidity);
     Serial2.println(datosTX); // Enviar por Serial2
     Sensor::ErrorSCD = true;
+    digitalWrite(18, LOW);
+    delay(60);
+    digitalWrite(18, HIGH);
   }
-  // =====================================
 
   // ===== LECTURA PERIÓDICA DE BATERÍA =====
+  // NOTA: Esta lectura ahora se gestiona con un lv_timer en el setup() para
+  // un mejor orden, por lo que el bloque de código aquí ya no es necesario.
+  /*
   static uint32_t lastBatteryRead = 0;
   if (millis() - lastBatteryRead > 30000) {
     readBatteryLevel();
     updateBatteryIndicator();
     lastBatteryRead = millis();
   }
+  */
 
   lv_timer_handler(); // Procesar eventos de LVGL (UI y temporizadores)
   delay(5); // Pequeño delay para permitir gestión de otras tareas
